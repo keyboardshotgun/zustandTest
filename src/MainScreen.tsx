@@ -20,7 +20,7 @@ const MainScreen = ({navigation}: MainScreenProps) => {
   const [pageNumber, setPageNumber] = useState<number>(0);
   const updateDataType = () => setIsLocalData(prevState => !prevState);
   const store = useStore();
-  const { items } = store;
+  const {items, nowDrama} = store;
 
   const counter = useStore(
     useCallback(state => {
@@ -33,9 +33,17 @@ const MainScreen = ({navigation}: MainScreenProps) => {
     navigation.navigate(pageName[type]);
   };
 
-  const addDrama = () => store.addDrama();
+  const addDrama = () => {
+    if (isLocalData) {
+      setIsLocalData(false);
+    }
+    store.addDrama();
+  };
 
   const getItems = () => {
+    if (!isLocalData) {
+      setIsLocalData(true);
+    }
     store?.getData({page: pageNumber});
     setPageNumber(prevState => prevState + 1);
   };
@@ -50,9 +58,14 @@ const MainScreen = ({navigation}: MainScreenProps) => {
           alignItems: 'center',
         }}>
         <View
-          style={{width: '100%', height: '20%', padding: 15, borderWidth: 1}}>
-          <Button title={'page1'} onPress={() => goSub(0)} />
-          <Button title={'page2'} onPress={() => goSub(1)} />
+          style={{
+            width: '100%',
+            height: '20%',
+            padding: 15,
+            justifyContent: 'space-between',
+          }}>
+          <Button title={'Share State'} onPress={() => goSub(0)} />
+          <Button title={'Confetti test'} onPress={() => goSub(1)} />
           <View
             style={{
               flexDirection: 'row',
@@ -75,15 +88,15 @@ const MainScreen = ({navigation}: MainScreenProps) => {
             padding: 15,
             flexDirection: 'row',
           }}>
-          <Button title={`Total : ${counter}`} onPress={() => {}} />
           <Button title={'Add'} onPress={addDrama} />
+          <Button title={`Total : ${counter}`} onPress={() => {}} />
           <View style={{width: 20}} />
-          <Button title={`Page : ${pageNumber}`} onPress={() => {}} />
-          <Button title={`Items : ${items.length??0}`} onPress={() => {}} />
           <Button title={'Get'} onPress={getItems} />
+          <Button title={`Page : ${pageNumber}`} onPress={() => {}} />
+          <Button title={`Items : ${items.length ?? 0}`} onPress={() => {}} />
         </View>
 
-        {store.nowDrama?.id ? (
+        {nowDrama?.id ? (
           <View
             style={{
               width: '100%',
@@ -92,14 +105,14 @@ const MainScreen = ({navigation}: MainScreenProps) => {
               flexDirection: 'row',
               backgroundColor: '#FFFFFF',
             }}>
-            <Text>{`${store.nowDrama?.id}`}</Text>
-            <Text>{`${store.nowDrama?.name}`}</Text>
+            <Text>{`${nowDrama?.id}`}</Text>
+            <Text>{`${nowDrama?.name}`}</Text>
           </View>
         ) : null}
         <View
           style={{
             width: '100%',
-            height: store.nowDrama?.id ? '60%' : '70%',
+            height: nowDrama?.id ? '60%' : '70%',
             padding: 15,
           }}>
           <ScrollableTable store={store} dataType={isLocalData} />
